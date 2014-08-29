@@ -22,8 +22,11 @@ namespace Sgra
             InitializeComponent();
         }
 
+        private System.Data.DataTable dt;
         private void SgraMain_Load(object sender, EventArgs e)
         {
+
+            /* Import Code */
             var databaseLocation = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.StartupPath)) + @"\Sgra.accdb";
             var query = "vehicle";
             kvBtnImport.Click += (sa, ea) =>
@@ -41,6 +44,54 @@ namespace Sgra
                         catch (Exception)
                         {
                             MessageBox.Show("Error: Invalid format of data."); 
+                        }
+                    }
+                };
+
+            /* Show New Vehicles */
+            kbBtnShow.Click += (sa, ea) =>
+                {
+                    dt = Db.GetNewVehicles(kvStartDate.Value.ToString(), kvEndDate.ToString());
+                    dataGridView1.DataSource = dt;
+                    if (dt.Rows.Count > 0)
+                    {
+                        kvBtnDelete.Visible = true;
+                        kvBtnCheckAll.Visible = true;
+                    }
+                    else
+                    {
+                        kvBtnDelete.Visible = false;
+                        kvBtnCheckAll.Visible = false;
+                    }
+                };
+
+            /* Show Passed Vehicles */
+            kvBtnPassed.Click += (sa, ea) =>
+            {
+                dt = Db.GetPassedVehicles(kvStartDate.Value.ToString(), kvEndDate.ToString());
+                dataGridView1.DataSource = dt;
+            };
+
+            /* Delete */
+
+            kvBtnDelete.Click += (sa, ea) =>
+                {
+                    if (dt != null)
+                    {
+                        Db.DeleteVehicles(dt);
+                        dt = Db.GetNewVehicles(kvStartDate.Value.ToString(), kvEndDate.ToString());
+                        dataGridView1.DataSource = dt;
+                    }
+                };
+                
+            /* Select all rows */
+            kvBtnCheckAll.Click += (sa, ea) =>
+                {
+                    if (dt != null)
+                    {
+                        foreach (DataRow row in dt.Rows)
+                        {
+                            row[0] = true;
                         }
                     }
                 };
